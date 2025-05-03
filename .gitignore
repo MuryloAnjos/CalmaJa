@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+src/main/java/resources/app.key
+src/main/java/resources/app.pub
+src/main/java/resources/application-test.properties
+src/main/java/resources/application-dev.properties
