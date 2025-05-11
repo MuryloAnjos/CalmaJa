@@ -4,6 +4,7 @@ import br.com.calmaja.dto.LoginRequest;
 import br.com.calmaja.dto.RegisterRequest;
 import br.com.calmaja.dto.TokenResponse;
 import br.com.calmaja.service.AuthenticationService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
+    @Transactional
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest request){
         authenticationService.register(request);

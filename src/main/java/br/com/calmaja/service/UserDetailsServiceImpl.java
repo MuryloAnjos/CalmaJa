@@ -5,7 +5,10 @@ import br.com.calmaja.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -20,4 +23,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .map(UserAuthenticated::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not Found!"));
     }
+
+
 }

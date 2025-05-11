@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,14 +42,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/h2-console/**").permitAll()
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/user").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET,"/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/user").hasAnyRole("ADMIN", "USER")
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(conf -> conf
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                );
+                )
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+        ;
 
         return http.build();
     }

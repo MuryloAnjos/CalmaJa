@@ -7,6 +7,7 @@ import br.com.calmaja.model.Role;
 import br.com.calmaja.model.User;
 import br.com.calmaja.repository.RoleRepository;
 import br.com.calmaja.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,7 @@ public class AuthenticationService {
         this.roleRepository = roleRepository;
         this.jwtService = jwtService;
     }
+
 
     public void register(RegisterRequest request){
 
@@ -58,7 +60,9 @@ public class AuthenticationService {
     }
 
     public TokenResponse authenticate(LoginRequest request){
-        Authentication authentication = new UsernamePasswordAuthenticationToken(request.username(), request.password());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
+        );
         String token = jwtService.generateToken(authentication);
         return new TokenResponse(token);
     }
