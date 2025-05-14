@@ -50,6 +50,10 @@ public class SecurityConfig {
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            System.out.println("Autenticação falhou: " + authException.getMessage());
+                            response.sendError(401, "Unauthorized: " + authException.getMessage());
+                        })
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
         ;

@@ -1,22 +1,94 @@
 package br.com.calmaja.service;
 
+import br.com.calmaja.dto.CommentResponse;
 import br.com.calmaja.dto.CreatePostRequest;
+import br.com.calmaja.dto.PostResponse;
+import br.com.calmaja.dto.UserResponse;
 import br.com.calmaja.model.Post;
 import br.com.calmaja.model.User;
 import br.com.calmaja.repository.PostRepository;
+import br.com.calmaja.repository.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
-    public Post createPost(Post post, User user){
+    public PostResponse createPost(CreatePostRequest request, User user){
+        Post post = new Post();
+        post.setTitle(request.title());
+        post.setContent(request.content());
+        post.setCreatedBy(user);
+        post = postRepository.save(post);
+        return mapToPostResponse(post);
+    }
 
-        return postRepository.save(post);
+    public List<PostResponse> getPosts(String content, String search, boolean isVerified, boolean onlyfollowing, User user){
+        List<Post> posts;
+
+        if(onlyfollowing){
+            User userWithFollowing = userRepository.findByUsernameWithFollowing(user.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not Found !"));
+            List<User> following = new ArrayList<>(userWithFollowing.getFollowing());
+            posts = postRepository.findByCreatedByInWithFetch(following);
+        }else{
+            posts = postRepository.findAllWithFetch();
+        }
+
+        if(content != null && !content.isEmpty()){
+            posts = postRepository.findByContent(content);
+        }
+
+        if(isVerified){
+            posts = postRepository.findByIsVerified(isVerified);
+        }
+
+        if(search != null && !search.isEmpty()){
+            posts = posts.stream()
+                    .filter(post -> post.getTitle().toLowerCase().contains(search.toLowerCase()) ||
+                            post.getContent().toLowerCase().contains(search.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        System.out.println("Posts Encotrados" + posts.size());
+        return posts.stream().map(this::mapToPostResponse)
+                .collect(Collectors.toList());
+
+    }
+
+    private PostResponse mapToPostResponse(Post post){
+        List<CommentResponse> commentResponses = post.getComments() != null ?
+                post.getComments().stream()
+                        .map(comment -> new CommentResponse(
+                                comment.getId(),
+                                comment.getContent(),
+                                comment.getCreatedAt(),
+                                new UserResponse(comment.getUser().getId(), comment.getUser().getUsername(), comment.getUser().getEmail())
+                        )).collect(Collectors.toList()) : List.of();
+
+
+        return new PostResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getUpvotes(),
+                post.getCreatedAt(),
+                new UserResponse(post.getCreatedBy().getId(), post.getCreatedBy().getUsername(), post.getCreatedBy().getEmail()),
+                commentResponses,
+                post.isVerified()
+        );
+
     }
 }
