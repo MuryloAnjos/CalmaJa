@@ -60,4 +60,16 @@ public class PostController {
         PostResponse updatedPost = postService.updatePost(id, request, user);
         return ResponseEntity.ok(updatedPost);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long id, Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaimAsString("sub");
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not Found !"));
+
+        postService.deletePost(id, user);
+        return ResponseEntity.status(204).build();
+    }
 }

@@ -84,6 +84,16 @@ public class PostService {
 
     }
 
+    public void deletePost(Long id, User user){
+        Post post = postRepository.findByIdWithFetch(id)
+                .orElseThrow(() -> new RuntimeException("Post not Found !"));
+
+        if(!post.getCreatedBy().getId().equals(user.getId())) {
+            throw new RuntimeException("This post does not belong to the authenticated user");
+        }
+        postRepository.delete(post);
+    }
+
     private PostResponse mapToPostResponse(Post post){
         List<CommentResponse> commentResponses = post.getComments() != null ?
                 post.getComments().stream()
