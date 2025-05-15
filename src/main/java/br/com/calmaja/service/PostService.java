@@ -1,11 +1,10 @@
 package br.com.calmaja.service;
 
-import br.com.calmaja.dto.CommentResponse;
-import br.com.calmaja.dto.CreatePostRequest;
-import br.com.calmaja.dto.PostResponse;
-import br.com.calmaja.dto.UserResponse;
+import br.com.calmaja.dto.*;
+import br.com.calmaja.model.Comment;
 import br.com.calmaja.model.Post;
 import br.com.calmaja.model.User;
+import br.com.calmaja.repository.CommentRepository;
 import br.com.calmaja.repository.PostRepository;
 import br.com.calmaja.repository.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,10 +20,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
     }
 
     public PostResponse createPost(CreatePostRequest request, User user){
@@ -93,6 +94,27 @@ public class PostService {
         }
         postRepository.delete(post);
     }
+
+    public CommentResponse addComment(Long idPost, AddCommentRequest request, User user){
+        Post post = postRepository.findByIdWithFetch(idPost)
+                .orElseThrow(() -> new RuntimeException("Post not Found !"));
+
+        Comment comment = new Comment();
+        comment.setContent(request.content());
+        comment.setPost(post);
+        comment.setUser(user);
+        commentRepository.save(comment);
+
+        return new CommentResponse(
+                comment.getId(),
+                comment.getContent(),
+                comment.getCreatedAt(),
+                new UserResponse(comment.getUser().getId(), comment.getUser().getUsername(), comment.getUser().getEmail())
+        );
+
+    }
+
+
 
     private PostResponse mapToPostResponse(Post post){
         List<CommentResponse> commentResponses = post.getComments() != null ?

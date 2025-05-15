@@ -1,5 +1,7 @@
 package br.com.calmaja.controller;
 
+import br.com.calmaja.dto.AddCommentRequest;
+import br.com.calmaja.dto.CommentResponse;
 import br.com.calmaja.dto.CreatePostRequest;
 import br.com.calmaja.dto.PostResponse;
 import br.com.calmaja.model.Post;
@@ -7,6 +9,7 @@ import br.com.calmaja.model.User;
 import br.com.calmaja.repository.PostRepository;
 import br.com.calmaja.repository.UserRepository;
 import br.com.calmaja.service.PostService;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -71,5 +74,19 @@ public class PostController {
 
         postService.deletePost(id, user);
         return ResponseEntity.status(204).build();
+    }
+
+    @PostMapping("{postId}/comments")
+    public ResponseEntity<CommentResponse> addComment(@PathVariable Long postId,
+                                                      @RequestBody AddCommentRequest request,
+                                                      Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaimAsString("sub");
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not Found !"));
+
+        postService.addComment(postId, request, user);
+        return ResponseEntity.status(201).build();
     }
 }
