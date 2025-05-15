@@ -10,6 +10,7 @@ import br.com.calmaja.repository.PostRepository;
 import br.com.calmaja.repository.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +66,21 @@ public class PostService {
         System.out.println("Posts Encotrados" + posts.size());
         return posts.stream().map(this::mapToPostResponse)
                 .collect(Collectors.toList());
+
+    }
+    public PostResponse updatePost(Long id, CreatePostRequest request, User user){
+        Post post = postRepository.findByIdWithFetch(id)
+                .orElseThrow(() -> new RuntimeException("Post not Found !"));
+
+        if(!post.getCreatedBy().getId().equals(user.getId())){
+            throw new RuntimeException("This post does not belong to the authenticated user");
+        }
+
+        post.setTitle(request.title() != null ? request.title() : post.getTitle() );
+        post.setContent(request.title() != null ? request.content() : post.getContent() );
+
+        post = postRepository.save(post);
+        return mapToPostResponse(post);
 
     }
 

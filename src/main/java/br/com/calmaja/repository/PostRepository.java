@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByContent(String content);
@@ -17,4 +18,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT DISTINCT p FROM Post p JOIN FETCH p.createdBy LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user")
     List<Post> findAllWithFetch();
+
+    @Query("SELECT DISTINCT p FROM Post p JOIN FETCH p.createdBy LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user WHERE p.id = :id")
+    Optional<Post> findByIdWithFetch(Long id);
 }

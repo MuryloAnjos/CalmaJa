@@ -50,4 +50,14 @@ public class PostController {
         List<PostResponse> posts = postService.getPosts(content, search, isVerified, onlyFollowing, user);
         return ResponseEntity.ok(posts);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody CreatePostRequest request, Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaimAsString("sub");
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not Found !"));
+        PostResponse updatedPost = postService.updatePost(id, request, user);
+        return ResponseEntity.ok(updatedPost);
+    }
 }
