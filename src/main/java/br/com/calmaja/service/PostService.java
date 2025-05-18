@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +38,18 @@ public class PostService {
         return mapToPostResponse(post);
     }
 
+    public List<PostResponse> getPostsByUser(UUID userId){
+        User user = userRepository.findByIdWithFetch(userId)
+                .orElseThrow(() -> new RuntimeException("User not Found !"));
+
+        List<Post> posts = postRepository.findByCreatedByInWithFetch(List.of(user));
+
+        return posts.stream().map(this::mapToPostResponse)
+                .collect(Collectors.toList());
+    }
+
     public List<PostResponse> getPosts(String content, String search, boolean isVerified, boolean onlyfollowing, User user){
+
         List<Post> posts;
 
         if(onlyfollowing){
@@ -64,7 +76,7 @@ public class PostService {
                     .collect(Collectors.toList());
         }
 
-        System.out.println("Posts Encotrados" + posts.size());
+        System.out.println("Posts Encontrados" + posts.size());
         return posts.stream().map(this::mapToPostResponse)
                 .collect(Collectors.toList());
 
@@ -112,6 +124,15 @@ public class PostService {
                 new UserResponse(comment.getUser().getId(), comment.getUser().getUsername(), comment.getUser().getEmail())
         );
 
+    }
+
+    public PostResponse verifyPost(Long idPost, User user){
+        Post post = postRepository.findByIdWithFetch(idPost)
+                .orElseThrow(() -> new RuntimeException("Post not Found !"));
+
+        post.setIsVerified(true);
+        postRepository.save(post);
+        return mapToPostResponse(post);
     }
 
 

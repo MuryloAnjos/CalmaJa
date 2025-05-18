@@ -1,5 +1,6 @@
 package br.com.calmaja.config;
 
+import br.com.calmaja.service.UserDetailsServiceImpl;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +30,7 @@ import java.security.interfaces.RSAPublicKey;
 
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Value("${jwt.public.key}")
@@ -37,7 +40,7 @@ public class SecurityConfig {
     private RSAPrivateKey priv;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, UserDetailsServiceImpl userDetailsService) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
@@ -46,13 +49,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/user").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated()
                 )
+                .userDetailsService(userDetailsService)
                 .oauth2ResourceServer(conf -> conf
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint((request, response, authException) -> {
                             System.out.println("Autenticação falhou: " + authException.getMessage());
-                            response.sendError(401, "Unauthorized: " + authException.getMessage());
                         })
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))

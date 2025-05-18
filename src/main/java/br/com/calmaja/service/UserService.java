@@ -56,4 +56,34 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public void followUser(UUID followedId, UUID followerId){
+        User followed = userRepository.findByIdWithFetch(followedId)
+                .orElseThrow(() -> new RuntimeException("Followed not found ! "));
+
+        User follower = userRepository.findByIdWithFetch(followerId)
+                .orElseThrow(() -> new RuntimeException("Follower not found ! "));
+
+        if(follower.getFollowing().contains(followed)){
+            throw new RuntimeException("Already following this user!");
+        }
+
+        follower.getFollowing().add(followed);
+        userRepository.save(follower);
+
+    }
+
+    public void unfollowUser(UUID followedId, UUID followerId){
+        User followed = userRepository.findByIdWithFetch(followedId)
+                .orElseThrow(() -> new RuntimeException("Followed not found ! "));
+
+        User follower = userRepository.findByIdWithFetch(followerId)
+                .orElseThrow(() -> new RuntimeException("Follower not found ! "));
+
+        if(!follower.getFollowing().remove(followed)){
+            throw new RuntimeException("Not Following this user!");
+        }
+
+        userRepository.save(follower);
+    }
+
 }

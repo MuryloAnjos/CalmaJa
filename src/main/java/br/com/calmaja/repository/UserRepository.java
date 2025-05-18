@@ -10,8 +10,12 @@ import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
+
     Optional<User> findByUsername(String username);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.following WHERE u.username = :username")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.following LEFT JOIN FETCH u.followers WHERE u.id = :id")
+    Optional<User> findByIdWithFetch(UUID id);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.following LEFT JOIN FETCH u.followers WHERE u.username = :username")
     Optional<User> findByUsernameWithFollowing(String username);
 }

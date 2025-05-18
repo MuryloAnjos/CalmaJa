@@ -30,7 +30,9 @@ public class JwtService {
 
         List<String> roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
+                .map(authority -> authority.replace("ROLE_", ""))
                 .collect(Collectors.toList());
+        System.out.println("Gerando token com roles " + roles);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("br.com.calmaja")

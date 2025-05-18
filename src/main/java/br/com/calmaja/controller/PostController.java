@@ -5,18 +5,24 @@ import br.com.calmaja.dto.CommentResponse;
 import br.com.calmaja.dto.CreatePostRequest;
 import br.com.calmaja.dto.PostResponse;
 import br.com.calmaja.model.Post;
+import br.com.calmaja.model.Role;
 import br.com.calmaja.model.User;
 import br.com.calmaja.repository.PostRepository;
+import br.com.calmaja.repository.RoleRepository;
 import br.com.calmaja.repository.UserRepository;
 import br.com.calmaja.service.PostService;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/posts")
@@ -54,6 +60,14 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<PostResponse>> getPostsByUser(@PathVariable UUID userId){
+        List<PostResponse> posts = postService.getPostsByUser(userId);
+        return ResponseEntity.ok(posts);
+    }
+
+
     @PutMapping("/{id}")
     public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody CreatePostRequest request, Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
@@ -89,4 +103,19 @@ public class PostController {
         postService.addComment(postId, request, user);
         return ResponseEntity.status(201).build();
     }
+
+    @PutMapping("{postId}/verify")
+    @PreAuthorize("hasRole('SPECIALIST')")
+    public ResponseEntity<PostResponse> verifyPost(@PathVariable Long postId, Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaimAsString("sub");
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not Found !"));
+
+        PostResponse postResponse = postService.verifyPost(postId, user);
+        return ResponseEntity.ok(postResponse);
+    }
+
+
 }

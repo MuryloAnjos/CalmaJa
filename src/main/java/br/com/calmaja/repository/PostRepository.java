@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
+
+    @Query("SELECT DISTINCT p FROM Post p JOIN FETCH p.createdBy LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user WHERE p.content LIKE %:content%")
     List<Post> findByContent(String content);
-    List<Post> findByCreatedBy(User user);
+
+    @Query("SELECT DISTINCT p FROM Post p JOIN FETCH p.createdBy LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user WHERE p.isVerified = :isVerified")
     List<Post> findByIsVerified(Boolean isVerified);
 
     @Query("SELECT DISTINCT p FROM Post p JOIN FETCH p.createdBy LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user WHERE p.createdBy IN :users")
@@ -21,4 +24,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT DISTINCT p FROM Post p JOIN FETCH p.createdBy LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user WHERE p.id = :id")
     Optional<Post> findByIdWithFetch(Long id);
+
+
 }
