@@ -20,6 +20,9 @@ public class User {
 
     private String password;
 
+    @Column(length = 255)
+    private String profileImagePath;
+
     @Column(length = 500)
     private String bioUser;
 
@@ -50,12 +53,13 @@ public class User {
     public User() {
     }
 
-    public User(UUID id, String username, String telephone, String email, String password, String bioUser, String refreshToken, Date refreshTokenExpiryDate, Set<Role> roles, Set<User> following, Set<User> followers) {
+    public User(UUID id, String username, String telephone, String email, String password, String profileImagePath, String bioUser, String refreshToken, Date refreshTokenExpiryDate, Set<Role> roles, Set<User> following, Set<User> followers) {
         this.id = id;
         this.username = username;
         this.telephone = telephone;
         this.email = email;
         this.password = password;
+        this.profileImagePath = profileImagePath;
         this.bioUser = bioUser;
         this.refreshToken = refreshToken;
         this.refreshTokenExpiryDate = refreshTokenExpiryDate;
@@ -94,6 +98,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getProfileImagePath() {
+        return profileImagePath;
+    }
+
+    public void setProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
     }
 
     public String getBioUser() {

@@ -21,11 +21,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final FileStorageService fileStorageService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.fileStorageService = fileStorageService;
     }
 
     public User getUserById(UUID id){
@@ -74,6 +76,11 @@ public class UserService {
             passwordChanged = true;
             user.setRefreshToken(null);
             user.setRefreshTokenExpiryDate(null); // invalida os refresh tokens antiga
+        }
+
+        if(request.profileImage() != null || !request.profileImage().isEmpty()){
+            String fileName = fileStorageService.storeFile(request.profileImage(), user.getId());
+            user.setProfileImagePath(fileName);
         }
 
         User updatedUser = userRepository.save(user);

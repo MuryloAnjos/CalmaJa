@@ -22,11 +22,15 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
+import java.lang.reflect.Array;
 import java.net.http.HttpRequest;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 
 @EnableWebSecurity
 @Configuration
@@ -38,6 +42,9 @@ public class SecurityConfig {
 
     @Value("${jwt.private.key}")
     private RSAPrivateKey priv;
+
+    @Value("${cors.allowed-origins}")
+    private String[] allowedOrigins;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, UserDetailsServiceImpl userDetailsService) throws Exception {
@@ -62,6 +69,23 @@ public class SecurityConfig {
         ;
 
         return http.build();
+    }
+
+    @Bean
+    public UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource(){
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins));
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("GET");
+        config.addAllowedMethod("POST");
+        config.addAllowedMethod("PUT");
+        config.addAllowedMethod("DELETE");
+        config.addAllowedMethod("OPTIONS"); //Suporte a chamada pré voo, para enviar um pre requisição e ver se o sistema tem acesso pelo cors
+        config.setMaxAge(3600L);
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean

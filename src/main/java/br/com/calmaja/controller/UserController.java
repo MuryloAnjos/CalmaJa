@@ -5,9 +5,12 @@ import br.com.calmaja.dto.UpdateUserRequest;
 import br.com.calmaja.model.User;
 import br.com.calmaja.model.UserAuthenticated;
 import br.com.calmaja.repository.UserRepository;
+import br.com.calmaja.service.FileStorageService;
 import br.com.calmaja.service.JwtService;
 import br.com.calmaja.service.UserService;
 import org.apache.coyote.Response;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,12 +26,12 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
-    private final JwtService jwtService;
+    private final FileStorageService fileStorageService;
 
-    public UserController(UserService userService, UserRepository userRepository, JwtService jwtService) {
+    public UserController(UserService userService, UserRepository userRepository, FileStorageService fileStorageService) {
         this.userService = userService;
         this.userRepository = userRepository;
-        this.jwtService = jwtService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping("/current")
@@ -47,9 +50,9 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/update")
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //vai permitir update de imagem ao atualizar user
     @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
-    public ResponseEntity<TokenResponse> updateUser(@RequestBody UpdateUserRequest request, Authentication authentication){
+    public ResponseEntity<TokenResponse> updateUser(@RequestPart("request") UpdateUserRequest request, Authentication authentication){
         if(authentication == null || authentication.getPrincipal() == null){
             return ResponseEntity.status(400).build();
         }
@@ -59,6 +62,14 @@ public class UserController {
 
         TokenResponse updatedUser = userService.updateUser(username, request);
         return updatedUser != null ? ResponseEntity.ok(updatedUser) : ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("profile-image/{fileName:.+}")
+    public ResponseEntity<Resource> getProfileUser(@PathVariable String fileName){
+        Resource resource = fileStorageService.loadAsResource(fileName);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(resource);
     }
 
     @PostMapping("/refresh")
