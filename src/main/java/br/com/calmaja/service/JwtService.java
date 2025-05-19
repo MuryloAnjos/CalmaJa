@@ -24,9 +24,9 @@ public class JwtService {
         this.jwtDecoder = jwtDecoder;
     }
 
-    public String generateToken(Authentication authentication){
+    public String generateAccessToken(Authentication authentication){
         Instant now = Instant.now();
-        long expiry = 3600L;
+        long expiry = 1800L;
 
         List<String> roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -39,6 +39,26 @@ public class JwtService {
                 .issuedAt(now)
                 .subject(authentication.getName())
                 .expiresAt(now.plusSeconds(expiry))
+                .claim("roles", roles)
+                .build();
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+    
+    public String generateRefreshToken(Authentication authentication){
+        Instant now = Instant.now();
+        long expiry = 7 * 24 * 60 * 60L;
+
+        List<String> roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .map(authority -> authority.replace("ROLE_", ""))
+                .collect(Collectors.toList());
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("br.com.calmaja")
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(expiry))
+                .subject(authentication.getName())
                 .claim("roles", roles)
                 .build();
 

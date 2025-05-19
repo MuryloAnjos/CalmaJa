@@ -2,10 +2,7 @@ package br.com.calmaja.model;
 
 import jakarta.persistence.*;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "USERS")
@@ -22,6 +19,14 @@ public class User {
     private String email;
 
     private String password;
+
+    @Column(length = 500)
+    private String bioUser;
+
+    @Column(length = 1024)
+    private String refreshToken;
+
+    private Date refreshTokenExpiryDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -45,13 +50,18 @@ public class User {
     public User() {
     }
 
-    public User(Set<Role> roles, String password, String email, String telephone, String username, UUID id) {
-        this.roles = roles;
-        this.password = password;
-        this.email = email;
-        this.telephone = telephone;
-        this.username = username;
+    public User(UUID id, String username, String telephone, String email, String password, String bioUser, String refreshToken, Date refreshTokenExpiryDate, Set<Role> roles, Set<User> following, Set<User> followers) {
         this.id = id;
+        this.username = username;
+        this.telephone = telephone;
+        this.email = email;
+        this.password = password;
+        this.bioUser = bioUser;
+        this.refreshToken = refreshToken;
+        this.refreshTokenExpiryDate = refreshTokenExpiryDate;
+        this.roles = roles;
+        this.following = following;
+        this.followers = followers;
     }
 
     public UUID getId() {
@@ -62,14 +72,6 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getTelephone() {
         return telephone;
     }
@@ -78,12 +80,12 @@ public class User {
         this.telephone = telephone;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUsername() {
+        return username;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
@@ -94,12 +96,44 @@ public class User {
         this.password = password;
     }
 
+    public String getBioUser() {
+        return bioUser;
+    }
+
+    public void setBioUser(String bioUser) {
+        this.bioUser = bioUser;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public Date getRefreshTokenExpiryDate() {
+        return refreshTokenExpiryDate;
+    }
+
+    public void setRefreshTokenExpiryDate(Date refreshTokenExpiryDate) {
+        this.refreshTokenExpiryDate = refreshTokenExpiryDate;
     }
 
     public Set<User> getFollowing() {

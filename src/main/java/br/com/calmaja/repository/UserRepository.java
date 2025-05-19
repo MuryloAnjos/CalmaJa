@@ -16,6 +16,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.following LEFT JOIN FETCH u.followers WHERE u.id = :id")
     Optional<User> findByIdWithFetch(UUID id);
 
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.following LEFT JOIN FETCH u.followers WHERE u.refreshToken = :refreshToken")
+    Optional<User> findByRefreshToken(String refreshToken);
+
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.following LEFT JOIN FETCH u.followers WHERE u.username = :username")
     Optional<User> findByUsernameWithFollowing(String username);
 }

@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
 
 @Service
@@ -63,8 +64,15 @@ public class AuthenticationService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
-        String token = jwtService.generateToken(authentication);
-        return new TokenResponse(token);
+        String accessToken = jwtService.generateAccessToken(authentication);
+        String refreshToken = jwtService.generateRefreshToken(authentication);
+
+        User user = userRepository.findByUsernameWithFollowing(request.username())
+                .orElseThrow(() -> new RuntimeException("User not Found !"));
+        user.setRefreshToken(refreshToken);
+        user.setRefreshTokenExpiryDate(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
+        userRepository.save(user);
+        return new TokenResponse(accessToken, refreshToken);
     }
 
 }

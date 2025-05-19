@@ -37,6 +37,7 @@ public class PostController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
     public ResponseEntity<PostResponse> createPost(@RequestBody CreatePostRequest request, Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
         String username = jwt.getClaimAsString("sub");
@@ -47,6 +48,7 @@ public class PostController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
     public ResponseEntity<List<PostResponse>> getPosts(@RequestParam(required = false) String content,
                                                @RequestParam(required = false) String search,
                                                @RequestParam(required = false) boolean isVerified,
@@ -62,13 +64,28 @@ public class PostController {
 
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
     public ResponseEntity<List<PostResponse>> getPostsByUser(@PathVariable UUID userId){
         List<PostResponse> posts = postService.getPostsByUser(userId);
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("/my-posts")
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
+    public ResponseEntity<List<PostResponse>> getMyPosts(Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaimAsString("sub");
+
+        User user = userRepository.findByUsernameWithFollowing(username)
+                .orElseThrow(() -> new RuntimeException("User not found !"));
+
+        List<PostResponse> posts = postService.getPostsByUser(user.getId());
+        return ResponseEntity.ok(posts);
+    }
+
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
     public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @RequestBody CreatePostRequest request, Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
         String username = jwt.getClaimAsString("sub");
@@ -79,6 +96,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
     public ResponseEntity<Void> deletePost(@PathVariable Long id, Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
         String username = jwt.getClaimAsString("sub");
@@ -91,6 +109,7 @@ public class PostController {
     }
 
     @PostMapping("{postId}/comments")
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
     public ResponseEntity<CommentResponse> addComment(@PathVariable Long postId,
                                                       @RequestBody AddCommentRequest request,
                                                       Authentication authentication){
