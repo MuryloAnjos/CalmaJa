@@ -126,11 +126,27 @@ public class PostService {
 
     }
 
+    public void addUpvote(Long postId){
+        Post post = postRepository.findByIdWithFetch(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found !"));
+
+        post.setUpvotes(post.getUpvotes() + 1);
+        postRepository.save(post);
+    }
+
+    public void addComplaints(Long postId){
+        Post post = postRepository.findByIdWithFetch(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found !"));
+
+        post.setComplaints(post.getComplaints() + 1);
+        postRepository.save(post);
+    }
+
     public PostResponse verifyPost(Long idPost, User user){
         Post post = postRepository.findByIdWithFetch(idPost)
                 .orElseThrow(() -> new RuntimeException("Post not Found !"));
 
-        post.setIsVerified(true);
+        post.setVerified(true);
         postRepository.save(post);
         return mapToPostResponse(post);
     }
@@ -153,6 +169,7 @@ public class PostService {
                 post.getTitle(),
                 post.getContent(),
                 post.getUpvotes(),
+                post.getComplaints(),
                 post.getCreatedAt(),
                 new UserResponse(post.getCreatedBy().getId(), post.getCreatedBy().getUsername(), post.getCreatedBy().getEmail()),
                 commentResponses,

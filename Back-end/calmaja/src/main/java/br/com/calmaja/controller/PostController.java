@@ -136,5 +136,19 @@ public class PostController {
         return ResponseEntity.ok(postResponse);
     }
 
+    @PostMapping("{postId}/upvote")
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
+    public ResponseEntity<Void> addUpvote(@PathVariable Long postId){
+        postService.addUpvote(postId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("{postId}/complaints")
+    @PreAuthorize("hasRole('SPECIALIST')")
+    public ResponseEntity<Void> addComplaint(@PathVariable Long postId){
+        postService.addComplaints(postId);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

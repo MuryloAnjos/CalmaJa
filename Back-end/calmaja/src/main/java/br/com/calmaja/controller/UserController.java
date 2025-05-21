@@ -65,6 +65,7 @@ public class UserController {
     }
 
     @GetMapping("profile-image/{fileName:.+}")
+    @PreAuthorize("hasRole('USER') or hasRole('SPECIALIST')")
     public ResponseEntity<Resource> getProfileUser(@PathVariable String fileName){
         Resource resource = fileStorageService.loadAsResource(fileName);
         return ResponseEntity.ok()

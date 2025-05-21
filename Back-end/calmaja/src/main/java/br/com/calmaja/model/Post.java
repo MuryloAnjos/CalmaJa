@@ -16,6 +16,7 @@ public class Post {
     private String title;
     private String content;
     private int upvotes;
+    private int complaints;
     private boolean isVerified;
     private LocalDateTime createdAt;
 
@@ -35,15 +36,16 @@ public class Post {
 
     }
 
-    public Post(Long id,String title, String content, int upvotes, boolean isVerified, User createdBy, List<Comment> comments, LocalDateTime createdAt) {
-        this.id = id;
+    public Post(String title, Long id, String content, int upvotes, int complaints, boolean isVerified, LocalDateTime createdAt, User createdBy, List<Comment> comments) {
         this.title = title;
+        this.id = id;
         this.content = content;
         this.upvotes = upvotes;
+        this.complaints = complaints;
         this.isVerified = isVerified;
+        this.createdAt = createdAt;
         this.createdBy = createdBy;
         this.comments = comments;
-        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -78,20 +80,28 @@ public class Post {
         this.upvotes = upvotes;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public int getComplaints() {
+        return complaints;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setComplaints(int complaints) {
+        this.complaints = complaints;
     }
 
     public boolean isVerified() {
         return isVerified;
     }
 
-    public void setIsVerified(boolean isVerified) {
-        this.isVerified = isVerified;
+    public void setVerified(boolean verified) {
+        isVerified = verified;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public User getCreatedBy() {
@@ -104,6 +114,10 @@ public class Post {
 
     public List<Comment> getComments() {
         return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
     public int commentsCount(){

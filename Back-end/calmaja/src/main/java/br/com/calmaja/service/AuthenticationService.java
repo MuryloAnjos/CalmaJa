@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.HashSet;
 
 @Service
-public class AuthenticationService {
+public class    AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;

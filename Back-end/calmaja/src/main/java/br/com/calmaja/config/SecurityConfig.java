@@ -82,9 +82,9 @@ public class SecurityConfig {
         config.addAllowedMethod("POST");
         config.addAllowedMethod("PUT");
         config.addAllowedMethod("DELETE");
-        config.addAllowedMethod("OPTIONS"); //Suporte a chamada pré voo, para enviar um pre requisição e ver se o sistema tem acesso pelo cors
-        config.setMaxAge(3600L);
-        source.registerCorsConfiguration("/**", config);
+        config.addAllowedMethod("OPTIONS"); // Suporte a chamada pré voo, para enviar um pre requisição e ver se o sistema tem acesso pelo cors
+        config.setMaxAge(3600L); // cache do options expira em 1 hora
+        source.registerCorsConfiguration("/**", config); // add a todos os endpoints da api
         return source;
     }
 
