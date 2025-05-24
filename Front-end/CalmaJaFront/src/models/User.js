@@ -1,0 +1,1 @@
+export const User = {id:'', username: '', role:'USER'}
